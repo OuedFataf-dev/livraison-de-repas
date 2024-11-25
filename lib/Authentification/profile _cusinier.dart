@@ -16,8 +16,7 @@ class Profile_Cusinier extends StatelessWidget {
             // Photo de profil
             const CircleAvatar(
                 radius: 50,
-                backgroundImage:
-                    AssetImage('assets/images/téléchargement.jpeg')),
+                backgroundImage: AssetImage('assets/images/profile (1).png')),
             const SizedBox(height: 16), // Espace entre l'image et le texte
             // Nom de l'utilisateur
             const Text(
@@ -55,8 +54,7 @@ class Profile_Cusinier extends StatelessWidget {
                     Container(
                       decoration: const BoxDecoration(
                         image: DecorationImage(
-                          image:
-                              AssetImage('assets/images/téléchargement.jpeg'),
+                          image: AssetImage('assets/images/profile (1).png'),
                           fit: BoxFit
                               .cover, // You can set fit as per your requirement
                         ),

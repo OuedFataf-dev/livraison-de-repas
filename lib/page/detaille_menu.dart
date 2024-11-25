@@ -23,7 +23,7 @@ class _MenuDetailPageState extends State<MenuDetailPage> {
   Future<MenuDetail> fetchMenuDetail() async {
     final response = await http.get(
       Uri.parse(
-          'https://node-js-api-0ytm.onrender.com/detaille/${widget.menuId}'),
+          'https://node-js-flutter-1.onrender.com/detaille/${widget.menuId}'),
     );
 
     if (response.statusCode == 200) {
@@ -43,7 +43,8 @@ class _MenuDetailPageState extends State<MenuDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Détails du Menu'),
+        title: const Text('Détails du Menu',
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 25)),
       ),
       body: FutureBuilder<MenuDetail>(
         future: menuDetail,

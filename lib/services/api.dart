@@ -5,7 +5,7 @@ import '../models/Foot.dart';
 Future<bool> registerUser(
     String name, String email, String password, String userType) async {
   final response = await http.post(
-    Uri.parse('https://node-js-api-0ytm.onrender.com/register/register-users'),
+    Uri.parse('https://node-js-flutter-1.onrender.com/register/register-users'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -28,7 +28,7 @@ Future<bool> registerUser(
 
 Future<bool> loginUser(String email, String password) async {
   final url = Uri.parse(
-      'https://node-js-api-0ytm.onrender.com/login/login-users'); // Remplacez cette URL par celle de votre API
+      'https://node-js-flutter-1.onrender.com/login/login-users'); // Remplacez cette URL par celle de votre API
 
   final response = await http.post(
     url,
@@ -53,7 +53,7 @@ Future<bool> loginUser(String email, String password) async {
 
 Future<List<Meals>> fetchFootData() async {
   final response = await http.get(
-    Uri.parse('https://node-js-api-0ytm.onrender.com/meals/recuperer-meals'),
+    Uri.parse('https://node-js-flutter-1.onrender.com/meals/recuperer-meals'),
   );
 
   if (response.statusCode == 200) {
@@ -63,7 +63,7 @@ Future<List<Meals>> fetchFootData() async {
       // Parsing the meals list
       List<Meals> footList = (jsonResponse['meals'] as List).map((repasJson) {
         String imageUrl = repasJson['image'] != null
-            ? 'https://node-js-api-0ytm.onrender.com/meals/recuperer-meals/uploads/${repasJson['image']}'
+            ? 'https://node-js-flutter-1.onrender.com/meals/recuperer-meals/uploads/${repasJson['image']}'
             : ''; // Mettez une URL par défaut ou gérez le cas null
 
         return Meals.fromJson({
@@ -79,4 +79,59 @@ Future<List<Meals>> fetchFootData() async {
   } else {
     throw Exception('Erreur lors de la récupération des repas');
   }
+}
+
+class ApiService {
+  Future<void> sendResetLink(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.97.60:5000/forgot-password'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Erreur lors de l\'envoi du lien de réinitialisation');
+      }
+    } catch (e) {
+      print('Erreur lors de l\'envoi de la requête : ${e.toString()}');
+      rethrow; // Rejeter l'erreur pour qu'elle soit capturée par l'appelant
+    }
+  }
+}
+
+// Crée une intention de paiement sur le backend
+Future<String?> _createPaymentIntent(int amount, String currency) async {
+  try {
+    // Prépare l'URL de la requête
+    final Uri url = Uri.parse(
+        'https://node-js-flutter-1.onrender.com/payement/create-payment-intent');
+
+    // Crée le corps de la requête avec les données nécessaires
+    final Map<String, dynamic> requestBody = {
+      'amount': amount, // Montant en cents
+      'currency': currency,
+    };
+
+    // Envoie la requête POST au backend
+    final http.Response response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode(requestBody), // Conversion du corps en JSON
+    );
+
+    // Affiche la réponse complète du serveur
+    print('Réponse de création de l\'intention de paiement: ${response.body}');
+
+    // Vérifie si la réponse contient le `client_secret`
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> responseData = jsonDecode(response.body);
+      return responseData['client_secret']; // Renvoie le client secret
+    } else {
+      print('Erreur: statut de la réponse ${response.statusCode}');
+    }
+  } catch (e) {
+    print('Erreur lors de la création du PaymentIntent : $e');
+  }
+  return null;
 }

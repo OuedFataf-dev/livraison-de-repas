@@ -24,8 +24,9 @@ class Commande {
   // Supprimez la déclaration de `totalAmount` comme champ final
   double get totalAmount =>
       price * quantity; // Utilisez le getter pour calculer le montant total
-
   factory Commande.fromJson(Map<String, dynamic> json) {
+    print(
+        'userComment: ${json['userComment']}'); // Ajouter un log pour vérifier la valeur de userComment
     return Commande(
       id: json['mealId'] as String? ?? '',
       name: json['name'] as String? ?? 'Inconnu',

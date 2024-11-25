@@ -13,6 +13,7 @@ import 'dart:convert';
 import 'package:provider/provider.dart';
 import '../services/payement.dart'; // Pour le service de paiement
 import '../models/commandes.dart';
+import 'customerSearch.dart';
 import '../services/api.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,17 +25,26 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   List<Meals> allMeals = []; // Liste pour tous les repas
-  List<Meals> filteredMeals = []; // list des repas flitree
+  List<Meals> filteredMeals = []; // Liste des repas filtrés
+  bool searchHasResult = true; // Indique si la recherche retourne des résultats
+
+  @override
+  void initState() {
+    super.initState();
+    filteredMeals = allMeals; // Initialement, tous les repas sont affichés
+  }
 
   void handSearche(String query) {
     setState(() {
       if (query.isEmpty) {
         filteredMeals = allMeals;
+        searchHasResult = true;
       } else {
         filteredMeals = allMeals.where((meal) {
           return meal.name.toLowerCase().contains(query.toLowerCase()) ||
               meal.price.toString().contains(query);
-        }).toList(); // Convertit l'itérable en liste
+        }).toList();
+        searchHasResult = filteredMeals.isNotEmpty;
       }
     });
   }
@@ -79,9 +89,27 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  const SizedBox(
+                    height: 20,
+                  ),
                   const Homeappbar(),
-                  const SizedBox(height: 5),
-                  SearchbarPage(onSearch: handSearche),
+                  const SizedBox(height: 15),
+                  TextField(
+                    // controller: controller,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      hintText: "Faites votre recherche ici",
+                      contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                    ),
+
+                    onTap: () {
+                      showSearch(
+                        context: context,
+                        delegate: CustomSearchDelegate(allMeals),
+                      );
+                    },
+                    //   performSearch(), // Déclenche la recherche lors de l'appui sur la touche Entrée
+                  ),
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.all(8),
@@ -133,7 +161,7 @@ class _HomePageState extends State<HomePage> {
                           style: TextStyle(fontSize: 20, color: Colors.black),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 15),
                     ],
                   ),
                   // Passer les deux premiers repas à MenuPage
@@ -144,13 +172,13 @@ class _HomePageState extends State<HomePage> {
           }
         },
       ),
-      UserProfile(),
       Commandes(
         detailId: '', // Pass the meal ID
         // Calculate and pass total amount
         //commandes: [], //
         commandes: commandes,
       ),
+      UserProfile(),
       Center(child: Text("Profile")),
     ];
 

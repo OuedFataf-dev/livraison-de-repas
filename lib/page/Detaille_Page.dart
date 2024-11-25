@@ -26,7 +26,7 @@ class _DetaillePageState extends State<DetaillePage> {
   int selectedQuantity = 1; // Ensure this is defined
   bool isLoading = true;
   String apiUrl =
-      'https://node-js-api-0ytm.onrender.com/mealsdetail'; // Replace with your actual API URL
+      'https://node-js-flutter-1.onrender.com/mealsdetail'; // Replace with your actual API URL
 
   @override
   void initState() {
@@ -89,7 +89,8 @@ class _DetaillePageState extends State<DetaillePage> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text("Detaille"),
+              const Text("Detaille",
+                  style: TextStyle(fontFamily: 'Poppins', fontSize: 25)),
               const SizedBox(height: 10),
               Container(
                 width: 50,
@@ -177,7 +178,7 @@ class _DetaillePageState extends State<DetaillePage> {
                                       children: [
                                         IconButton(
                                           style: IconButton.styleFrom(
-                                            backgroundColor: Colors.orange,
+                                            //backgroundColor: Colors.orange,
                                             shape: const RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.horizontal(
@@ -192,9 +193,10 @@ class _DetaillePageState extends State<DetaillePage> {
                                           },
                                           icon: const Icon(Icons.add),
                                         ),
+                                        Text('$selectedQuantity'),
                                         IconButton(
                                           style: IconButton.styleFrom(
-                                            backgroundColor: Colors.orange,
+                                            // backgroundColor: Colors.orange,
                                             shape: const RoundedRectangleBorder(
                                               borderRadius:
                                                   BorderRadius.horizontal(
@@ -261,8 +263,8 @@ class _DetaillePageState extends State<DetaillePage> {
                                       // totalAmount:
                                       //  meal.price * selectedQuantity,
                                       rating: meal.rating,
-                                      userComment:
-                                          '', // Ajoutez un champ pour le commentaire si nécessaire
+                                      userComment: meal.userComment,
+                                      // Ajoutez un champ pour le commentaire si nécessaire
                                     );
 
                                     // Ajouter la commande au Provider

@@ -1,11 +1,15 @@
+import 'package:cookeazy/Authentification/login.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../models/Menu.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Detaille_Page.dart';
 import '../Authentification/profile _cusinier.dart';
 import '../Authentification/profile.dart';
 import '../page/detaille_menu.dart';
+import '../ajouterImage.dart';
+//import '../services/api.dart';
 
 class ScreenPagesmenu extends StatefulWidget {
   const ScreenPagesmenu({super.key});
@@ -25,8 +29,8 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
   }
 
   Future<List<Menu>> fetchMenuData() async {
-    final response = await http.get(
-        Uri.parse('https://node-js-api-0ytm.onrender.com/menu/recuperer-menu'));
+    final response = await http.get(Uri.parse(
+        'https://node-js-flutter-1.onrender.com/menu/recuperer-menu'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -40,6 +44,45 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
       }
     } else {
       throw Exception('Erreur lors de la récupération des menus');
+    }
+  }
+
+  // // Fonction pour récupérer le token depuis SharedPreferences
+  Future<String?> getTokenFromStorage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString(
+        'user_token'); // Assurez-vous que 'user_token' est la clé correcte
+
+    if (token != null) {
+      print('Token récupéré : $token');
+    } else {
+      print('Aucun token trouvé');
+    }
+
+    return token;
+  }
+
+  // Fonction pour déconnecter un utilisateur
+  Future<bool> logoutUser(String token) async {
+    final url = Uri.parse(
+        'https://node-js-flutter-1.onrender.com/logout-user'); // URL de déconnexion de votre API
+
+    final response = await http.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+        'Authorization': 'Bearer $token', // Ajout du token dans les en-têtes
+      },
+    );
+
+    if (response.statusCode == 200) {
+      print('User logged out successfully');
+      return true;
+    } else {
+      //print('Failed to logout: ${response.body}');
+      print('Failed to logout: ${response.statusCode} - ${response.body}');
+
+      return false;
     }
   }
 
@@ -76,6 +119,36 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Menu Page'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout),
+            onPressed: () async {
+              try {
+                // Récupérer les SharedPreferences
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+
+                // Supprimer le token de SharedPreferences
+                await prefs.remove('user_token');
+
+                // Afficher un message de succès
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Déconnexion réussie')),
+                );
+
+                // Rediriger l'utilisateur vers l'écran de connexion
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => SignUp()),
+                );
+              } catch (e) {
+                // Gérer les erreurs
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erreur lors de la déconnexion : $e')),
+                );
+              }
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(5),
@@ -171,15 +244,14 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            const UserProfile(),
+                                            const Profile_Cusinier(),
                                       ),
                                     );
                                   },
                                   child: const CircleAvatar(
                                     radius: 20,
-                                    backgroundImage: NetworkImage(
-                                      'https://plus.unsplash.com/premium_photo-1675252369719-dd52bc69c3df?q=80&w=1374&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                                    ),
+                                    backgroundImage: AssetImage(
+                                        'assets/images/profile (1).png'),
                                   ),
                                 ),
                                 const SizedBox(width: 16),
@@ -244,6 +316,26 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
                                                 style: const TextStyle(
                                                   fontSize: 16,
                                                   fontWeight: FontWeight.w400,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 10,
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            Ajouterimage()),
+                                                  );
+                                                },
+                                                child: Text(
+                                                  'salut',
+                                                  style: TextStyle(
+                                                    fontSize: 16,
+                                                    color: Colors.grey[600],
+                                                  ),
                                                 ),
                                               ),
                                             ],

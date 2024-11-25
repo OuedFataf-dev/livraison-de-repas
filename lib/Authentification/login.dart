@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../page/Home_pages.dart';
 import '../services/api.dart';
 import '../main.dart';
+import ' ForgotPassword.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({super.key});
@@ -27,27 +28,29 @@ class _SignUpState extends State<SignUp> {
       final password = passwordController.text;
 
       try {
-        final success = await loginUser(
-            email, password); // Assurez-vous que loginUser retourne un bool
+        final success = await loginUser(email, password);
 
-        // Vérifier si le widget est toujours monté avant de naviguer ou afficher des messages
         if (mounted) {
           if (success) {
-            // Naviguer vers la page d'accueil après une connexion réussie
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => HomePage()),
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Échec de la connexion')),
+              const SnackBar(
+                content: Text(
+                  'Mot de passe ou email incorrect',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
             );
           }
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Une erreur est survenue')),
+            const SnackBar(content: Text('Erreur lors de la connexion')),
           );
         }
         print('Erreur lors de la connexion: $e');
@@ -73,7 +76,7 @@ class _SignUpState extends State<SignUp> {
                   child: CircleAvatar(
                     backgroundColor: Colors.transparent,
                     radius: 100.0,
-                    child: Image.asset('assets/images/logo.jpg'),
+                    child: Image.asset('assets/images/burger.png'),
                   ),
                 ),
                 const SizedBox(height: 20.0),
@@ -137,6 +140,27 @@ class _SignUpState extends State<SignUp> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20.0),
+
+                // Nouveau bouton "Mot de passe oublié"
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ForgetPassword(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Mot de passe oublié ?',
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 20.0),
                 Center(
                   child: GestureDetector(

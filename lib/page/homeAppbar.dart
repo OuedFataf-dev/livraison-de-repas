@@ -48,9 +48,7 @@ class _HomeappbarState extends State<Homeappbar> {
             },
             child: const CircleAvatar(
                 radius: 30,
-                backgroundImage: AssetImage(
-                  'assets/images/téléchargement.jpeg',
-                )),
+                backgroundImage: AssetImage('assets/images/user.png')),
           ),
         ],
       ),

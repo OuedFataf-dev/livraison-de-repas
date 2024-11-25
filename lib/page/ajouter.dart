@@ -21,12 +21,18 @@ class _PickerFileFromFirebaseState extends State<PickerFileFromFirebase> {
   final TextEditingController priceController = TextEditingController();
   final TextEditingController mealController = TextEditingController();
   final TextEditingController minuteController = TextEditingController();
+  final TextEditingController descroController = TextEditingController();
+  final TextEditingController ratingController = TextEditingController();
+  final TextEditingController commController = TextEditingController();
 
   bool get isFormValid {
     return imageFile != null &&
         mealController.text.isNotEmpty &&
         priceController.text.isNotEmpty &&
-        minuteController.text.isNotEmpty;
+        minuteController.text.isNotEmpty &&
+        descroController.text.isNotEmpty &&
+        ratingController.text.isNotEmpty &&
+        commController.text.isNotEmpty;
   }
 
   @override
@@ -34,6 +40,9 @@ class _PickerFileFromFirebaseState extends State<PickerFileFromFirebase> {
     priceController.dispose();
     mealController.dispose();
     minuteController.dispose();
+    descroController.dispose();
+    ratingController.dispose();
+    commController.dispose();
     super.dispose();
   }
 
@@ -98,6 +107,34 @@ class _PickerFileFromFirebaseState extends State<PickerFileFromFirebase> {
               controller: minuteController,
               decoration: InputDecoration(
                 labelText: "Minute",
+                border: OutlineInputBorder(),
+              ),
+              // keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
+            ),
+            TextField(
+              controller: descroController,
+              decoration: InputDecoration(
+                labelText: "description",
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            SizedBox(height: 20),
+            TextField(
+              controller: ratingController,
+              decoration: InputDecoration(
+                labelText: "rating",
+                border: OutlineInputBorder(),
+              ),
+              // keyboardType: TextInputType.number,
+              onChanged: (_) => setState(() {}),
+            ),
+            SizedBox(height: 20),
+            TextField(
+              controller: commController,
+              decoration: InputDecoration(
+                labelText: "commentaire",
                 border: OutlineInputBorder(),
               ),
               // keyboardType: TextInputType.number,
@@ -272,7 +309,7 @@ class _PickerFileFromFirebaseState extends State<PickerFileFromFirebase> {
   }
 
   Future<http.Response> uploadFileToServer(File file) async {
-    final uri = Uri.parse('http://192.168.93.60:5000/api/upload');
+    final uri = Uri.parse('https://node-js-flutter-1.onrender.com/api/upload');
     final request = http.MultipartRequest('POST', uri);
 
     try {
@@ -287,13 +324,16 @@ class _PickerFileFromFirebaseState extends State<PickerFileFromFirebase> {
   }
 
   Future<bool> sendDataToNode(String imageUrl) async {
-    final uri = Uri.parse('http://192.168.93.60:5000/api/endpoint');
+    final uri = Uri.parse('https://node-js-flutter.onrender.com/api/endpoint');
 
     final Map<String, dynamic> data = {
       "imageUrl": imageUrl,
       "price": priceController.text,
       "minute": minuteController.text,
       "name": mealController.text,
+      "description": descroController.text,
+      "rating": ratingController.text,
+      "commentaire": commController.text,
     };
 
     try {

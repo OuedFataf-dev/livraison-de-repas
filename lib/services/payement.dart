@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'suivi_commande.dart'; // Assurez-vous d'importer votre page de suivi
+import 'package:http/http.dart' as http;
+import 'dart:convert'; // Nécessaire pour jsonDecode et jsonEncode
 
 class StripeService {
   StripeService._();
 
   static final StripeService instance = StripeService._();
-
-  // Méthode principale pour effectuer un paiement
   Future<bool> makePayment({
     required int amount,
     required String currency,
@@ -26,29 +24,26 @@ class StripeService {
       print("Feuille de paiement présentée avec succès.");
 
       // Confirmation du paiement
-      await Stripe.instance.confirmPaymentSheetPayment();
-      print("Paiement confirmé.");
+      try {
+        print("Présentation de la feuille de paiement.");
+        await Stripe.instance.presentPaymentSheet();
+        print("Feuille de paiement présentée avec succès.");
 
-      // Créer une commande après le paiement
-      String? orderId = await _createOrderOnBackend(
-        amount: amount,
-        currency: currency,
-        context: context,
-      );
-
-      if (orderId != null) {
-        print("Commande créée avec succès. ID de commande: $orderId");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CommandeSuivi(detailId: orderId),
-          ),
-        );
-        return true; // Retourne true si le paiement est réussi
-      } else {
-        print('Erreur lors de la création de la commande.');
-        throw Exception('Erreur lors de la création de la commande.');
+        // Confirmation du paiement
+        try {
+          print("Confirmation du paiement.");
+          await Stripe.instance.confirmPaymentSheetPayment();
+          print("Paiement confirmé.");
+        } catch (e, stacktrace) {
+          print("Erreur lors de la confirmation du paiement: $e");
+          print("Trace de la pile: $stacktrace");
+        }
+      } catch (e) {
+        print("Erreur lors de la présentation de la feuille de paiement: $e");
       }
+
+      // Retourner true si le paiement est réussi
+      return true;
     } catch (e) {
       // Amélioration de l'affichage des erreurs
       print("Erreur lors du paiement : ${e.toString()}");
@@ -72,8 +67,7 @@ class StripeService {
         await Stripe.instance.initPaymentSheet(
           paymentSheetParameters: SetupPaymentSheetParameters(
             paymentIntentClientSecret: paymentIntentClientSecret,
-            merchantDisplayName:
-                'fataf ouedraogo', // Remplacez par le nom de votre entreprise
+            merchantDisplayName: 'fataf ouedraogo', // Nom de l'entreprise
           ),
         );
         print('Feuille de paiement initialisée avec succès.');
@@ -88,60 +82,36 @@ class StripeService {
   // Crée une intention de paiement sur le backend
   Future<String?> _createPaymentIntent(int amount, String currency) async {
     try {
-      final Dio dio = Dio();
-      var response = await dio.post(
-        'https://node-js-api-0ytm.onrender.com/payement/create-payment-intent',
-        data: {
-          'amount': amount, // Montant en cents
-          'currency': currency,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
+      // Prépare l'URL de la requête
+      final Uri url = Uri.parse(
+          'https://node-js-flutter-1.onrender.com/payement/create-payment-intent');
+
+      // Crée le corps de la requête avec les données nécessaires
+      final Map<String, dynamic> requestBody = {
+        'amount': amount, // Montant en cents
+        'currency': currency,
+      };
+
+      // Envoie la requête POST au backend
+      final http.Response response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody), // Conversion du corps en JSON
       );
+
+      // Affiche la réponse complète du serveur
       print(
-          'Réponse de création de l\'intention de paiement: ${response.data}');
-      return response.data['client_secret']; // Renvoie le client secret
-    } catch (e) {
-      print('Erreur lors de la création du PaymentIntent : $e');
-      return null;
-    }
-  }
+          'Réponse de création de l\'intention de paiement: ${response.body}');
 
-  // Crée une commande sur le backend après le paiement
-  Future<String?> _createOrderOnBackend({
-    required int amount,
-    required String currency,
-    required BuildContext context, // Passer le contexte ici pour la navigation
-  }) async {
-    try {
-      final Dio dio = Dio();
-      var response = await dio.post(
-        'https://node-js-api-0ytm.onrender.com/payement/create-order', // Assurez-vous que l'URL est correcte
-        data: {
-          'amount': amount,
-          'currency': currency,
-        },
-        options: Options(
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        ),
-      );
-
-      // Imprimez la réponse pour le débogage
-      print('Réponse du serveur création de commande: ${response.data}');
-
-      // Vérifiez si la réponse contient l'ID de la commande
-      if (response.data != null && response.data['orderId'] != null) {
-        return response.data['orderId'];
+      // Vérifie si la réponse contient le `client_secret`
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return responseData['client_secret']; // Renvoie le client secret
       } else {
-        print('Erreur: la réponse du serveur ne contient pas d\'order_id');
+        print('Erreur: statut de la réponse ${response.statusCode}');
       }
     } catch (e) {
-      print('Erreur lors de la création de la commande : $e');
+      print('Erreur lors de la création du PaymentIntent : $e');
     }
     return null;
   }

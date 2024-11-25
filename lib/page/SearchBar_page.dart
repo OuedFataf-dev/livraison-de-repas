@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import '../models/Foot.dart';
 
 class SearchbarPage extends StatefulWidget {
+  final List<Meals> allMeals;
   final Function(String) onSearch;
-  final bool
-      searchHasResult; // Indique si la recherche a retourné des résultats
+  final bool searchHasResult;
 
   const SearchbarPage({
     Key? key,
+    required this.allMeals,
     required this.onSearch,
-    this.searchHasResult = true, // Par défaut, la recherche a des résultats
+    this.searchHasResult = true,
   }) : super(key: key);
 
   @override
@@ -21,11 +23,7 @@ class _SearchbarPageState extends State<SearchbarPage> {
   void performSearch() {
     String query = controller.text.trim();
     if (query.isNotEmpty) {
-      widget.onSearch(query); // Appeler la fonction de recherche
-    } else {
-      setState(() {
-        // On ne change rien à searchHasResult si le champ est vide
-      });
+      widget.onSearch(query);
     }
   }
 
@@ -50,12 +48,13 @@ class _SearchbarPageState extends State<SearchbarPage> {
                     hintText: "Faites votre recherche ici",
                     contentPadding: EdgeInsets.symmetric(horizontal: 15),
                   ),
+                  onSubmitted: (_) =>
+                      performSearch(), // Déclenche la recherche lors de l'appui sur la touche Entrée
                 ),
               ),
               IconButton(
                 icon: const Icon(Icons.search),
-                onPressed:
-                    performSearch, // Lancer la recherche lorsqu'on appuie sur l'icône
+                onPressed: performSearch,
               ),
             ],
           ),

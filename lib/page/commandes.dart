@@ -1,18 +1,23 @@
-import 'package:cookeazy/services/suivi_commande.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/payement.dart'; // Pour le service de paiement
 import '../models/commandes.dart'; // Modèle de commande
-import '../services/provider.dart'; // Importer votre provider
-//import '../screens/delivery_tracking_screen.dart'; // Import your delivery tracking screen
+import '../services/provider.dart';
+import 'commanderService.dart';
+// Importer votre provider
 
-class Commandes extends StatelessWidget {
-  final List<Commande> commandes; // Recevez les commandes passées
-  final String detailId; // Add detailId
+class Commandes extends StatefulWidget {
+  final List<Commande> commandes;
+  final String detailId;
 
   const Commandes({Key? key, required this.detailId, required this.commandes})
       : super(key: key);
 
+  @override
+  _CommandesState createState() => _CommandesState();
+}
+
+class _CommandesState extends State<Commandes> {
   @override
   Widget build(BuildContext context) {
     final commandeProvider =
@@ -20,33 +25,14 @@ class Commandes extends StatelessWidget {
 
     // Utilisez les commandes déjà présentes, pas besoin de fetch si elles sont fournies
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      commandeProvider.setCommandes(commandes);
+      commandeProvider.setCommandes(widget.commandes);
     });
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text('Mes Commandes'),
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => CommandeSuivi(
-                            detailId: '',
-                          )),
-                );
-              },
-              child: const Text(
-                'livraison',
-                style: TextStyle(fontSize: 20, color: Colors.black),
-              ),
-            ),
-          ],
-        ),
+        title: const Text('Mes Commandes'),
       ),
-      body: commandes.isEmpty
+      body: widget.commandes.isEmpty
           ? const Center(
               child: Text(
                 'Aucune commande disponible.',
@@ -55,21 +41,6 @@ class Commandes extends StatelessWidget {
             )
           : Column(
               children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => CommandeSuivi(
-                                detailId: '',
-                              )),
-                    );
-                  },
-                  child: const Text(
-                    'livraison',
-                    style: TextStyle(fontSize: 20, color: Colors.black),
-                  ),
-                ),
                 const Padding(
                   padding: EdgeInsets.all(10.0),
                   child: Text(
@@ -83,9 +54,9 @@ class Commandes extends StatelessWidget {
                 ),
                 Expanded(
                   child: ListView.builder(
-                    itemCount: commandes.length,
+                    itemCount: widget.commandes.length,
                     itemBuilder: (context, index) {
-                      final commande = commandes[index];
+                      final commande = widget.commandes[index];
                       return Card(
                         child: Column(
                           children: [
@@ -116,7 +87,7 @@ class Commandes extends StatelessWidget {
                                     ),
                                   ),
                                   Text(
-                                    '${(commande.totalAmount / 100).toStringAsFixed(2)}\$',
+                                    '${(commande.totalAmount).toStringAsFixed(2)}\$',
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -137,7 +108,7 @@ class Commandes extends StatelessWidget {
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 5),
+                                  const SizedBox(height: 10),
                                   Text(
                                     'Commentaire: ${commande.userComment}',
                                     style: const TextStyle(
@@ -161,47 +132,47 @@ class Commandes extends StatelessWidget {
                     height: 50,
                     child: ElevatedButton(
                       onPressed: () async {
-                        // Start the payment process
+                        // Commencez le processus de paiement
                         bool paymentSuccessful =
                             await StripeService.instance.makePayment(
-                          amount: commandes[0].totalAmount.toInt(),
+                          amount: widget.commandes[0].totalAmount.toInt(),
                           currency: 'usd',
                           context: context,
                         );
 
-                        if (paymentSuccessful) {
-                          // Show success dialog if payment is successful
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: const Text('Paiement réussi!'),
-                              content: const Text(
-                                  'Souhaitez-vous voir les détails de livraison?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(); // Close the dialog
-                                  },
-                                  child: const Text('Non'),
+                        // Mettez à jour l'interface utilisateur après le paiement
+                        if (mounted) {
+                          setState(() {
+                            if (paymentSuccessful) {
+                              showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  title: const Text('Paiement réussi!'),
+                                  content: const Text(
+                                      'Votre paiement a été traité avec succès.'),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () async {
+                                        // Appeler la fonction de création de commande ici
+                                        await CommandeService.instance
+                                            .createOrder(
+                                          amount: widget
+                                              .commandes[0].totalAmount
+                                              .toInt(),
+                                          currency: 'usd',
+                                          context: context,
+                                        );
+                                      },
+                                      child: const Text('Ok'),
+                                    ),
+                                  ],
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            CommandeSuivi(detailId: detailId),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text('Oui'),
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          // Handle payment failure if needed
-                          print("Échec du paiement.");
+                              );
+                            } else {
+                              // Gérez l'échec du paiement
+                              print("Échec du paiement.");
+                            }
+                          });
                         }
                       },
                       style: ElevatedButton.styleFrom(

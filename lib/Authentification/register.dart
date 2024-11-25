@@ -15,7 +15,6 @@ class _RegisterState extends State<Register> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
-
   Future<void> _registerUser() async {
     if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -26,7 +25,7 @@ class _RegisterState extends State<Register> {
       final email = emailController.text;
       final password = passwordController.text;
       final userType =
-          'customer'; // ou 'chef' selon la logique de votre application
+          'customer'; // ou 'chef' selon la logique de ton application
 
       final success = await registerUser(
         name,
@@ -35,11 +34,15 @@ class _RegisterState extends State<Register> {
         userType,
       );
 
+      if (!mounted) return; // Vérification si le widget est toujours monté
+
       if (success) {
-        // Rediriger vers la page de connexion après une inscription réussie
+        // Si l'inscription réussit, rediriger vers la page de connexion
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => SignUp()), // Correction ici
+          MaterialPageRoute(
+              builder: (context) =>
+                  SignUp()), // S'assurer que SignUp() est défini
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -67,7 +70,7 @@ class _RegisterState extends State<Register> {
                   decoration: BoxDecoration(
                     image: const DecorationImage(
                       fit: BoxFit.fill,
-                      image: AssetImage('assets/images/images (2).jpeg'),
+                      image: AssetImage('assets/images/burger.png'),
                     ),
                     borderRadius: BorderRadius.circular(15),
                   ),

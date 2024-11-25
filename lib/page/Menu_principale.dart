@@ -40,7 +40,7 @@ class _MenuPrincipaleState extends State<MenuPrincipale> {
                         MaterialPageRoute(
                             builder: (context) => PickerFileFromFirebase()));
                   },
-                  icon: const Icon(CupertinoIcons.chevron_back)),
+                  icon: const Icon(Icons.add)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -54,7 +54,7 @@ class _MenuPrincipaleState extends State<MenuPrincipale> {
                         Navigator.push(context,
                             MaterialPageRoute(builder: (context) => MyApp()));
                       },
-                      icon: const Icon(CupertinoIcons.add)),
+                      icon: const Icon(CupertinoIcons.chevron_back)),
                   const SizedBox(
                     height: 10,
                   ),
@@ -79,8 +79,8 @@ class _MenuPrincipaleState extends State<MenuPrincipale> {
               const SizedBox(
                 height: 10,
               ),
-            //  Mealspages()
-            Mealspages(meals: widget.foot),
+              //  Mealspages()
+              Mealspages(meals: widget.foot),
             ],
           ),
         ),

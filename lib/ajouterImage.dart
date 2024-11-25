@@ -6,8 +6,6 @@ import 'dart:convert';
 import 'package:fluttertoast/fluttertoast.dart';
 
 class Ajouterimage extends StatefulWidget {
-  //const PickerFileFromFirebase({super.key});
-
   @override
   State<Ajouterimage> createState() => _AjouterimageState();
 }
@@ -19,15 +17,30 @@ class _AjouterimageState extends State<Ajouterimage> {
   String? uploadedImageUrl;
 
   final TextEditingController priceController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+  final TextEditingController ratingController = TextEditingController();
+  final TextEditingController chefIdController = TextEditingController();
+  final TextEditingController ingredientsController = TextEditingController();
 
-  bool get isFormValid {
-    return imageFile != null && priceController.text.isNotEmpty;
-  }
+  bool availability = false;
 
   @override
   void dispose() {
     priceController.dispose();
+    descriptionController.dispose();
+    ratingController.dispose();
+    chefIdController.dispose();
+    ingredientsController.dispose();
     super.dispose();
+  }
+
+  bool get isFormValid {
+    return imageFile != null &&
+        priceController.text.isNotEmpty &&
+        descriptionController.text.isNotEmpty &&
+        ratingController.text.isNotEmpty &&
+        chefIdController.text.isNotEmpty &&
+        ingredientsController.text.isNotEmpty;
   }
 
   @override
@@ -50,63 +63,101 @@ class _AjouterimageState extends State<Ajouterimage> {
               child: Text(
                 "Sélectionner l'image",
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
             SizedBox(height: 20),
-            if (imageFile != null)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Image.file(
-                  imageFile!,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                ),
-              ),
+            if (imageFile != null) buildImagePreview(),
             SizedBox(height: 20),
-            TextField(
-              controller: priceController,
-              decoration: InputDecoration(
-                labelText: "Prix",
-                border: OutlineInputBorder(),
-              ),
-              //  keyboardType: TextInputType
-              // .number, // Optionnel : pour forcer l'entrée numérique
-              onChanged: (_) => setState(() {}),
-            ),
+            buildTextField(priceController, "Prix"),
+            SizedBox(height: 20),
+            buildTextField(descriptionController, "Description"),
+            SizedBox(height: 20),
+            buildTextField(ingredientsController,
+                "Ingrédients (séparés par des virgules)"),
+            SizedBox(height: 20),
+            buildTextField(ratingController, "Évaluation (sur 5)",
+                keyboardType: TextInputType.number),
+            SizedBox(height: 20),
+            buildTextField(chefIdController, "Chef ID"),
+            SizedBox(height: 20),
+            buildAvailabilitySwitch(),
             SizedBox(height: 20),
             if (isLoading) CircularProgressIndicator(),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isFormValid && !isLoading ? uploadImage : null,
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
-                backgroundColor:
-                    isFormValid && !isLoading ? Colors.blue : Colors.grey,
-              ),
-              child: Text(
-                "Envoyer",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            if (uploadedImageUrl != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 20.0),
-                child: Text(
-                  'Image téléchargée avec succès',
-                  style: TextStyle(fontSize: 16, color: Colors.green),
-                ),
-              ),
+            buildSubmitButton(),
+            if (uploadedImageUrl != null) buildSuccessMessage(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget buildImagePreview() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(15),
+      child: Image.file(
+        imageFile!,
+        width: double.infinity,
+        height: 200,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+
+  Widget buildTextField(TextEditingController controller, String label,
+      {TextInputType keyboardType = TextInputType.text}) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(),
+      ),
+      keyboardType: keyboardType,
+      onChanged: (_) => setState(() {}),
+    );
+  }
+
+  Widget buildAvailabilitySwitch() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text("Disponible"),
+        Switch(
+          value: availability,
+          onChanged: (value) {
+            setState(() {
+              availability = value;
+            });
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: isFormValid && !isLoading ? uploadImage : null,
+      style: ElevatedButton.styleFrom(
+        padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 24.0),
+        backgroundColor: isFormValid && !isLoading ? Colors.blue : Colors.grey,
+      ),
+      child: Text(
+        "Envoyer",
+        style: TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget buildSuccessMessage() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 20.0),
+      child: Text(
+        'Image téléchargée avec succès',
+        style: TextStyle(fontSize: 16, color: Colors.green),
       ),
     );
   }
@@ -129,25 +180,11 @@ class _AjouterimageState extends State<Ajouterimage> {
           imageFile = File(result.files.single.path!);
         });
       } else {
-        Fluttertoast.showToast(
-          msg: 'Aucun fichier sélectionné',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.orange,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
+        showToast('Aucun fichier sélectionné', Colors.orange);
       }
     } catch (e) {
       print('Erreur lors de la sélection de fichier: $e');
-      Fluttertoast.showToast(
-        msg: 'Erreur lors de la sélection de fichier',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      showToast('Erreur lors de la sélection de fichier', Colors.red);
     } finally {
       setState(() {
         isFilePickerActive = false;
@@ -157,14 +194,8 @@ class _AjouterimageState extends State<Ajouterimage> {
 
   Future<void> uploadImage() async {
     if (imageFile == null) {
-      Fluttertoast.showToast(
-        msg: 'Veuillez sélectionner une image et entrer le prix',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.orange,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      showToast(
+          'Veuillez sélectionner une image et entrer le prix', Colors.orange);
       return;
     }
 
@@ -181,62 +212,22 @@ class _AjouterimageState extends State<Ajouterimage> {
 
         if (imageUrl != null) {
           final sendDataResponse = await sendDataToNode(imageUrl);
-
           if (sendDataResponse) {
-            setState(() {
-              uploadedImageUrl = imageUrl;
-              imageFile = null;
-              priceController.clear(); // Réinitialiser uniquement le champ prix
-            });
-
-            Fluttertoast.showToast(
-              msg: 'Image et prix téléchargés avec succès',
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.CENTER,
-              backgroundColor: Colors.green,
-              textColor: Colors.white,
-              fontSize: 16.0,
-            );
+            resetForm(imageUrl);
+            showToast('Image et prix téléchargés avec succès', Colors.green);
           } else {
-            Fluttertoast.showToast(
-              msg: 'Erreur lors de l\'envoi des données au serveur',
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.CENTER,
-              backgroundColor: Colors.red,
-              textColor: Colors.white,
-              fontSize: 16.0,
-            );
+            showToast(
+                'Erreur lors de l\'envoi des données au serveur', Colors.red);
           }
         } else {
-          Fluttertoast.showToast(
-            msg: 'URL de l\'image non reçue du serveur',
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.CENTER,
-            backgroundColor: Colors.red,
-            textColor: Colors.white,
-            fontSize: 16.0,
-          );
+          showToast('URL de l\'image non reçue du serveur', Colors.red);
         }
       } else {
-        Fluttertoast.showToast(
-          msg: 'Erreur lors du téléchargement de l\'image',
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0,
-        );
+        showToast('Erreur lors du téléchargement de l\'image', Colors.red);
       }
     } catch (e) {
       print('Erreur: $e');
-      Fluttertoast.showToast(
-        msg: 'Erreur lors de la connexion au serveur',
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        backgroundColor: Colors.red,
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
+      showToast('Erreur lors de la connexion au serveur', Colors.red);
     } finally {
       setState(() {
         isLoading = false;
@@ -245,26 +236,25 @@ class _AjouterimageState extends State<Ajouterimage> {
   }
 
   Future<http.Response> uploadFileToServer(File file) async {
-    final uri = Uri.parse('http://192.168.93.60:5000/api');
+    final uri = Uri.parse('https://node-js-flutter-1.onrender.com/add/api');
     final request = http.MultipartRequest('POST', uri);
-
-    try {
-      request.files.add(await http.MultipartFile.fromPath('file', file.path));
-
-      final streamedResponse = await request.send();
-      return await http.Response.fromStream(streamedResponse);
-    } catch (e) {
-      print('Erreur lors de l\'upload du fichier: $e');
-      throw Exception('Erreur lors de l\'upload du fichier');
-    }
+    request.files.add(await http.MultipartFile.fromPath('file', file.path));
+    final streamedResponse = await request.send();
+    return await http.Response.fromStream(streamedResponse);
   }
 
   Future<bool> sendDataToNode(String imageUrl) async {
-    final uri = Uri.parse('http://192.168.93.60:5000/endpoint');
-
+    final uri = Uri.parse('https://node-js-flutter.onrender.com/add/endpoint');
+    List<String> ingredientsList =
+        ingredientsController.text.split(',').map((e) => e.trim()).toList();
     final Map<String, dynamic> data = {
       "imageUrl": imageUrl,
       "price": priceController.text,
+      "description": descriptionController.text,
+      "availability": availability,
+      "ingredients": ingredientsList,
+      "rating": double.parse(ratingController.text),
+      "chefId": chefIdController.text,
     };
 
     try {
@@ -274,15 +264,33 @@ class _AjouterimageState extends State<Ajouterimage> {
         body: json.encode(data),
       );
 
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        print('Erreur lors de l\'envoi des données: ${response.body}');
-        return false;
-      }
+      return response.statusCode == 200;
     } catch (e) {
       print('Erreur lors de l\'envoi des données au serveur: $e');
       return false;
     }
+  }
+
+  void resetForm(String imageUrl) {
+    setState(() {
+      uploadedImageUrl = imageUrl;
+      imageFile = null;
+      priceController.clear();
+      descriptionController.clear();
+      ratingController.clear();
+      chefIdController.clear();
+      ingredientsController.clear();
+    });
+  }
+
+  void showToast(String message, Color backgroundColor) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
+      backgroundColor: backgroundColor,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
   }
 }

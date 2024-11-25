@@ -42,8 +42,18 @@ dependencies:
   fluttertoast: ^8.2.8
   dio: ^5.7.0
   flutter_stripe: ^11.1.0
+  flutter_launcher_icons: ^0.13.1
   internet_connection_checker_plus: ^2.5.2
   provider: ^6.1.2
+  shared_preferences: ^2.3.2
+
+
+flutter_icons:
+    android: true
+    ios: true
+    image_path: "assets/images/meal.png"
+    remove_alpha_ios: true
+
 
 dev_dependencies:
   flutter_test:

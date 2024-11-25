@@ -48,7 +48,7 @@ class MenuDetail {
   final String imageUrl;
 
   // Base URL to prefix the image URL from the API
-  static const String baseUrl = 'https://node-js-api-0ytm.onrender.com/';
+  static const String baseUrl = 'https://node-js-flutter-1.onrender.com/add/';
 
   MenuDetail({
     required this.id,

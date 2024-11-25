@@ -8,6 +8,7 @@ import 'Authentification/register.dart';
 import './page/screen_pagesmenu.dart';
 import './page/Menu_principale.dart';
 import './page/ajouter.dart';
+import './Authentification/ ForgotPassword.dart';
 import './page/Meals.pages.dart';
 import 'ajouterImage.dart';
 import 'package:cookeazy/page/Menu_principale.dart';
@@ -22,6 +23,7 @@ import './page/Detaille_Page.dart';
 import './services/suivi_commande.dart';
 import './services/provider.dart';
 import 'package:provider/provider.dart';
+import './services/reinitialisr.dart';
 
 ///import 'Authentification/login.dart';
 void main() {
@@ -57,13 +59,33 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        home: Scaffold(
-            appBar: AppBar(
-              title: const Text(
-                'APPLICATION DE LIVRAISON DE REPAS',
-                style: TextStyle(fontFamily: 'Poppins'),
-              ),
-            ),
-            body: Register()));
+      initialRoute:
+          '/signup', // Changer ceci si vous voulez que ForgetPassword soit la page de démarrage
+      routes: {
+        '/signup': (context) => SignUp(), // Page pour signer
+        '/forget-password': (context) =>
+            SignUp(), // Page de demande de réinitialisation
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/reset-password') {
+          // Obtenez le token des arguments
+          final token = settings.arguments as String;
+          return MaterialPageRoute(
+            builder: (context) =>
+                ResetPasswordScreen(token: token), // Page de réinitialisation
+          );
+        }
+        return null; // Retourne null si aucune route ne correspond
+      },
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text(
+            'APPLICATION DE LIVRAISON DE REPAS',
+            style: TextStyle(fontFamily: 'Poppins'),
+          ),
+        ),
+        body: SignUp(), // Page d'accueil par défaut
+      ),
+    );
   }
 }

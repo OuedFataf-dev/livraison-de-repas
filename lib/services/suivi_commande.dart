@@ -12,7 +12,9 @@ class CommandeSuivi extends StatefulWidget {
 }
 
 class _CommandeSuiviState extends State<CommandeSuivi> {
-  String status = "terminine"; // Statut initial
+  String? status; // Statut initial null
+  String? estimateDeliveryTime; // Temps de livraison initial null
+  bool isLoading = true; // Indicateur de chargement
 
   @override
   void initState() {
@@ -22,38 +24,39 @@ class _CommandeSuiviState extends State<CommandeSuivi> {
 
   Future<void> _getOrderStatus() async {
     try {
-      // Fetch status from the backend API
-      String fetchedStatus = await fetchOrderStatus(widget.detailId);
+      var orderData = await fetchOrderStatus(widget.detailId);
       setState(() {
-        status = fetchedStatus;
+        status = orderData['status'];
+        estimateDeliveryTime = orderData['estimate_delivery_time'];
+        isLoading = false;
 
-        // Rediriger l'utilisateur vers l'écran de suivi de livraison si le statut est "livraison terminée"
         if (status == 'livraison terminée') {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) =>
-                  SuiviLivraisonScreen(), // Remplacez par votre écran de suivi de livraison
+              builder: (context) => SuiviLivraisonScreen(),
             ),
           );
         }
       });
     } catch (e) {
       print('Erreur lors de la récupération du statut: $e');
+      print('Réponse complète: ${e.toString()}');
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   // Fetch order status from the backend API
-  Future<String> fetchOrderStatus(String orderId) async {
+  Future<Map<String, dynamic>> fetchOrderStatus(String orderId) async {
     final response = await http.get(
       Uri.parse(
-          'http:// 192.168.93.60:5000/order-status/$orderId'), // Assurez-vous que l'URL est correcte
+          'https://node-js-flutter.onrender.com/commande/order-status/$orderId'),
     );
 
     if (response.statusCode == 200) {
-      // Si la requête a réussi, décoder la réponse
-      final data = jsonDecode(response.body);
-      return data['status'] ?? 'en attente';
+      return jsonDecode(response.body);
     } else {
       throw Exception(
           'Erreur lors de la récupération du statut de la commande');
@@ -64,55 +67,44 @@ class _CommandeSuiviState extends State<CommandeSuivi> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Suivi de la commande'),
+        title: const Text('Suivi de la commande',
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 25)),
       ),
-      body: Column(
-        children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const Commandes(
-                          detailId: '',
-                          commandes: [],
-                        )),
-              );
-            },
-            child: Text(
-              'payement: ',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+      body: isLoading
+          ? const Center(
+              child: CircularProgressIndicator()) // Affichage du chargement
+          : Column(
+              children: [
+                Text(
+                  'Statut de votre commande : ${status ?? "Inconnu"}',
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  'Temps estimé de livraison : ${estimateDeliveryTime ?? "Non disponible"}',
+                  style: const TextStyle(fontSize: 16),
+                ),
+                SizedBox(
+                  height: 200.0,
+                  child: Stepper(
+                    currentStep: _getStepIndex(status ?? ""),
+                    steps: _buildSteps(),
+                    type: StepperType.vertical,
+                    controlsBuilder:
+                        (BuildContext context, ControlsDetails controls) {
+                      return Container(); // Pas de boutons supplémentaires
+                    },
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: _getOrderStatus,
+                  child: const Text('Rafraîchir statut'),
+                ),
+              ],
             ),
-          ),
-          Text(
-            'Statut de votre commande : $status',
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(
-            height: 200.0,
-            child: Stepper(
-              currentStep: _getStepIndex(status),
-              steps: _buildSteps(),
-              type: StepperType.vertical,
-              controlsBuilder:
-                  (BuildContext context, ControlsDetails controls) {
-                return Container(); // Pas de boutons supplémentaires
-              },
-            ),
-          ),
-          ElevatedButton(
-            onPressed: _getOrderStatus,
-            child: const Text('Rafraîchir statut'),
-          ),
-        ],
-      ),
     );
   }
 
-  // Convertir le statut en une étape du Stepper
   int _getStepIndex(String status) {
     switch (status) {
       case "en attente":
@@ -126,21 +118,20 @@ class _CommandeSuiviState extends State<CommandeSuivi> {
     }
   }
 
-  // Construire les étapes du Stepper
   List<Step> _buildSteps() {
-    return [
-      const Step(
+    return const [
+      Step(
         title: Text('Commande reçue'),
         content:
             Text('Votre commande a été reçue et est en attente de traitement.'),
         isActive: true,
       ),
-      const Step(
+      Step(
         title: Text('En cours'),
         content: Text('Votre commande est en cours de préparation.'),
         isActive: true,
       ),
-      const Step(
+      Step(
         title: Text('Livraison terminée'),
         content: Text('Votre commande a été livrée.'),
         isActive: true,
@@ -155,10 +146,12 @@ class SuiviLivraisonScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Suivi de Livraison'),
+        title: const Text('Suivi de Livraison',
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 25)),
       ),
       body: Center(
-        child: const Text('Votre livraison est en route !'),
+        child: const Text('Votre livraison est en route !',
+            style: TextStyle(fontFamily: 'Poppins', fontSize: 25)),
       ),
     );
   }
