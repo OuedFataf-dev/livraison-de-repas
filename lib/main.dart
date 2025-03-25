@@ -2,6 +2,7 @@ import 'package:cookeazy/models/Menu.dart';
 import 'package:cookeazy/page/Home_pages.dart';
 import 'package:cookeazy/services/api.dart';
 import 'package:flutter/material.dart';
+import './page/splash.dart';
 //import 'Home_Page.dart';
 import 'Authentification/login.dart';
 import 'Authentification/register.dart';
@@ -27,11 +28,13 @@ import './services/reinitialisr.dart';
 
 ///import 'Authentification/login.dart';
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); // Ajoute ceci
   // Initialiser Stripe avec la clé publique
   Stripe.publishableKey =
       'pk_test_51Od6veCXR1cwPbKYeHcRW1ibOuwoWh4r3JVoymcLmiulT6F0BKFJd83kNYRRnGz2Ii5ZMVWs6KJ50zuRFqVAJWmf00bybu9wPK';
 
   runApp(
+    
     ChangeNotifierProvider(
       create: (_) => CommandeProvider(),
       child: MyApp(),
@@ -59,33 +62,29 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      initialRoute:
-          '/signup', // Changer ceci si vous voulez que ForgetPassword soit la page de démarrage
+      debugShowCheckedModeBanner: false, // Supprime le bandeau de debug
+      initialRoute: '/home', // Route de démarrage
       routes: {
-        '/signup': (context) => SignUp(), // Page pour signer
-        '/forget-password': (context) =>
-            SignUp(), // Page de demande de réinitialisation
+        '/home': (context) => SplashScreen(
+              context: context,
+              onNavigateToLogin: () {
+                Navigator.pushReplacementNamed(context, '/login');
+              },
+            ),
+        '/login': (context) => SignUp(), // Ajout de la route /login
+        '/forget-password': (context) => SignUp(),
       },
       onGenerateRoute: (settings) {
         if (settings.name == '/reset-password') {
-          // Obtenez le token des arguments
-          final token = settings.arguments as String;
-          return MaterialPageRoute(
-            builder: (context) =>
-                ResetPasswordScreen(token: token), // Page de réinitialisation
-          );
+          final token = settings.arguments as String?;
+          if (token != null) {
+            return MaterialPageRoute(
+              builder: (context) => ResetPasswordScreen(token: token),
+            );
+          }
         }
-        return null; // Retourne null si aucune route ne correspond
+        return null;
       },
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'APPLICATION DE LIVRAISON DE REPAS',
-            style: TextStyle(fontFamily: 'Poppins'),
-          ),
-        ),
-        body: SignUp(), // Page d'accueil par défaut
-      ),
     );
   }
 }

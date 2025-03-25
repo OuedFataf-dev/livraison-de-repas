@@ -12,8 +12,7 @@ class MenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal, // Défilement horizontal
+    return SingleChildScrollView(      scrollDirection: Axis.horizontal, // Défilement horizontal
       child: Row(
         children: List.generate(
           foot.length, // Parcourir chaque élément de la liste foot
@@ -105,3 +104,8 @@ class MenuPage extends StatelessWidget {
     );
   }
 }
+
+
+
+
+

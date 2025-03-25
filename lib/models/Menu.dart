@@ -27,7 +27,8 @@ class Menu {
       id: json['_id'] ?? '', // Handle case where _id might be null
       name: json['name'] ?? 'Unknown',
       price: json['price'] ?? 0, // Default value if price is null
-      minute: json['minute'] ?? 'N/A',
+     minute: json['minute']?.toString() ?? 'N/A',
+
       cuisineType: json['cuisineType'] ?? 'Unknown',
       rating: json['rating'] ?? 0, // Default value if rating is null
       chefId: json['chefId'] ?? 'Unknown',
@@ -48,7 +49,7 @@ class MenuDetail {
   final String imageUrl;
 
   // Base URL to prefix the image URL from the API
-  static const String baseUrl = 'https://node-js-flutter-1.onrender.com/add/';
+  static const String baseUrl = 'http://192.168.12.60:5000/add/';
 
   MenuDetail({
     required this.id,

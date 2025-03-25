@@ -2,10 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/Foot.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
+
 Future<bool> registerUser(
     String name, String email, String password, String userType) async {
   final response = await http.post(
-    Uri.parse('https://node-js-flutter-1.onrender.com/register/register-users'),
+    Uri.parse('http://192.168.12.60:5000/register/register-users'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -25,10 +27,11 @@ Future<bool> registerUser(
     return false; // Retourner faux en cas d'échec
   }
 }
+ 
+
 
 Future<bool> loginUser(String email, String password) async {
-  final url = Uri.parse(
-      'https://node-js-flutter-1.onrender.com/login/login-users'); // Remplacez cette URL par celle de votre API
+  final url = Uri.parse('http://192.168.12.60:5000/login/login-users');
 
   final response = await http.post(
     url,
@@ -42,18 +45,30 @@ Future<bool> loginUser(String email, String password) async {
   );
 
   if (response.statusCode == 200) {
-    // Si la connexion est réussie
-    return true;
+    final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+    if (responseData.containsKey('userId')) {
+      String userId = responseData['userId'];
+
+      // Stocker l'ID utilisateur localement
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('userId', userId);
+
+      print('Utilisateur connecté avec ID: $userId');
+      return true;
+    } else {
+      print('Aucun userId retourné par l’API');
+      return false;
+    }
   } else {
-    // Si la connexion échoue
-    print('Failed to login: ${response.body}');
+    print('Échec de connexion: ${response.body}');
     return false;
   }
 }
 
 Future<List<Meals>> fetchFootData() async {
   final response = await http.get(
-    Uri.parse('https://node-js-flutter-1.onrender.com/meals/recuperer-meals'),
+    Uri.parse('http://192.168.12.60:5000/meals/recuperer-meals'),
   );
 
   if (response.statusCode == 200) {
@@ -62,10 +77,11 @@ Future<List<Meals>> fetchFootData() async {
     if (jsonResponse['meals'] != null && jsonResponse['meals'] is List) {
       // Parsing the meals list
       List<Meals> footList = (jsonResponse['meals'] as List).map((repasJson) {
-        String imageUrl = repasJson['image'] != null
-            ? 'https://node-js-flutter-1.onrender.com/meals/recuperer-meals/uploads/${repasJson['image']}'
-            : ''; // Mettez une URL par défaut ou gérez le cas null
+       String imageUrl = repasJson['imageUrl'] != null
+    ? 'http://192.168.12.60:5000/${repasJson['imageUrl']}'
+    : '';
 
+print('Image URL: $imageUrl');
         return Meals.fromJson({
           ...repasJson,
           'image': imageUrl, // Assurez-vous que l'image a le bon format
@@ -105,7 +121,7 @@ Future<String?> _createPaymentIntent(int amount, String currency) async {
   try {
     // Prépare l'URL de la requête
     final Uri url = Uri.parse(
-        'https://node-js-flutter-1.onrender.com/payement/create-payment-intent');
+        '/create-payment-intent');
 
     // Crée le corps de la requête avec les données nécessaires
     final Map<String, dynamic> requestBody = {

@@ -84,7 +84,7 @@ class StripeService {
     try {
       // Prépare l'URL de la requête
       final Uri url = Uri.parse(
-          'https://node-js-flutter-1.onrender.com/payement/create-payment-intent');
+          'http://192.168.12.60:5000/payement/create-payment-intent');
 
       // Crée le corps de la requête avec les données nécessaires
       final Map<String, dynamic> requestBody = {

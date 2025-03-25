@@ -26,7 +26,7 @@ class _DetaillePageState extends State<DetaillePage> {
   int selectedQuantity = 1; // Ensure this is defined
   bool isLoading = true;
   String apiUrl =
-      'https://node-js-flutter-1.onrender.com/mealsdetail'; // Replace with your actual API URL
+      'http://192.168.12.60:5000/mealsdetail'; // Replace with your actual API URL
 
   @override
   void initState() {

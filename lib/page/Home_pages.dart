@@ -10,6 +10,7 @@ import '../models/Foot.dart';
 import 'package:http/http.dart' as http;
 import ' SingleChildScrollViewpro.dart';
 import 'dart:convert';
+  import '../services/provider.dart';
 import 'package:provider/provider.dart';
 import '../services/payement.dart'; // Pour le service de paiement
 import '../models/commandes.dart';
@@ -27,7 +28,7 @@ class _HomePageState extends State<HomePage> {
   List<Meals> allMeals = []; // Liste pour tous les repas
   List<Meals> filteredMeals = []; // Liste des repas filtrés
   bool searchHasResult = true; // Indique si la recherche retourne des résultats
-
+  
   @override
   void initState() {
     super.initState();
@@ -60,6 +61,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+     final commandeProvider = Provider.of<CommandeProvider>(context);
+
     List<Widget> pages = [
       FutureBuilder<List<Meals>>(
         future: fetchFootData(), // Fetch meals data
@@ -99,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       hintText: "Faites votre recherche ici",
-                      contentPadding: EdgeInsets.symmetric(horizontal: 15),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 50),
                     ),
 
                     onTap: () {
@@ -157,8 +160,8 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                         child: const Text(
-                          'Voir tous',
-                          style: TextStyle(fontSize: 20, color: Colors.black),
+                          'All meals',
+                          style: TextStyle(fontSize: 10, color: Colors.black),
                         ),
                       ),
                       const SizedBox(height: 15),
@@ -166,19 +169,19 @@ class _HomePageState extends State<HomePage> {
                   ),
                   // Passer les deux premiers repas à MenuPage
                   MenuPage(foot: firstTwoMeals),
-                ],
+                ],                                                                  
               ),
             );
           }
         },
       ),
-      Commandes(
-        detailId: '', // Pass the meal ID
-        // Calculate and pass total amount
-        //commandes: [], //
-        commandes: commandes,
-      ),
-      UserProfile(),
+     Commandes(
+                                              commandes:
+                                                  commandeProvider.orders,
+                                              detailId: filteredMeals.isNotEmpty ? filteredMeals[0].id : '',
+                                                  // Remplacez par votre CommandesPage
+     ),                      
+      UserProfile(userId: "67db40b8eabd5c7a59548679"),
       Center(child: Text("Profile")),
     ];
 

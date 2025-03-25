@@ -20,7 +20,7 @@ class Meals {
   factory Meals.fromJson(Map<String, dynamic> json) {
     // On suppose que l'URL de base pour les images est celle de votre serveur
     const String baseUrl =
-        'https://node-js-flutter-1.onrender.com/'; // Changez cela si nécessaire
+        'http://192.168.12.60:5000/'; // Changez cela si nécessaire
 
     // Construire l'URL complète de l'image en ajoutant le chemin relatif à l'URL de base
     String fullImageUrl = baseUrl + json['imageUrl'];
@@ -64,7 +64,7 @@ class MealDetail {
   factory MealDetail.fromJson(Map<String, dynamic> json) {
     // Assuming baseUrl is defined elsewhere
     const String baseUrl =
-        'https://node-js-flutter-1.onrender.com/'; // Changez cela si nécessaire
+        'http://192.168.12.60:5000/'; // Changez cela si nécessaire
 
     String fullImageUrl = baseUrl + (json['imageUrl'] ?? 'default_image.jpg');
 

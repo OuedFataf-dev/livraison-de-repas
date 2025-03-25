@@ -30,7 +30,7 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
 
   Future<List<Menu>> fetchMenuData() async {
     final response = await http.get(Uri.parse(
-        'https://node-js-flutter-1.onrender.com/menu/recuperer-menu'));
+        'http://192.168.12.60:5000/menu/recuperer-menu'));
 
     if (response.statusCode == 200) {
       final Map<String, dynamic> jsonResponse = json.decode(response.body);
@@ -65,7 +65,7 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
   // Fonction pour déconnecter un utilisateur
   Future<bool> logoutUser(String token) async {
     final url = Uri.parse(
-        'https://node-js-flutter-1.onrender.com/logout-user'); // URL de déconnexion de votre API
+        'http://192.168.12.60:5000/logout-user'); // URL de déconnexion de votre API
 
     final response = await http.post(
       url,
@@ -92,7 +92,7 @@ class _ScreenPagesmenuState extends State<ScreenPagesmenu> {
   bool showPopularOnly = false;
 
   // Liste des types de cuisine pour le filtre
-  final List<String> cuisineTypes = ['All', 'Italian', 'Japanese', 'Mexican'];
+  final List<String> cuisineTypes = ['All', 'Italian', 'Malien', 'Mexican','Ivoirien'];
 
   // Filtrer la liste des menus en fonction des critères sélectionnés
   List<Menu> get filteredMenuList {

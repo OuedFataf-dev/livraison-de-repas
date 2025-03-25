@@ -1,3 +1,4 @@
+import 'package:cookeazy/ajouterImage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 //import 'Meals.pages.dart';
@@ -69,10 +70,18 @@ class _MenuPrincipaleState extends State<MenuPrincipale> {
                     width: 50,
                     height: 50,
                     decoration: const BoxDecoration(color: Colors.white),
-                    child: IconButton(
-                      onPressed: () => {},
-                      icon: const Icon(Icons.notifications_active),
-                    ),
+                    child: GestureDetector(
+                        onTap:   () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                             PickerFileFromFirebase(),
+                                      ),
+                                    );
+                                  },
+                       child: Icon(Icons.add),
+                    )
                   )
                 ],
               ),

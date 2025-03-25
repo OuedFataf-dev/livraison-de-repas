@@ -52,7 +52,7 @@ class _CommandeSuiviState extends State<CommandeSuivi> {
   Future<Map<String, dynamic>> fetchOrderStatus(String orderId) async {
     final response = await http.get(
       Uri.parse(
-          'https://node-js-flutter.onrender.com/commande/order-status/$orderId'),
+          'http://192.168.12.60:5000/commande/order-status/$orderId'),
     );
 
     if (response.statusCode == 200) {

@@ -78,7 +78,7 @@ class CommandeService {
     try {
       // Prépare l'URL de la requête
       final Uri url = Uri.parse(
-          'https://node-js-flutter-1.onrender.com/payement/create-order');
+          'http://192.168.12.60:5000/payement/create-order');
 
       // Crée le corps de la requête avec les données nécessaires
       final Map<String, dynamic> requestBody = {

@@ -23,7 +23,7 @@ class _MenuDetailPageState extends State<MenuDetailPage> {
   Future<MenuDetail> fetchMenuDetail() async {
     final response = await http.get(
       Uri.parse(
-          'https://node-js-flutter-1.onrender.com/detaille/${widget.menuId}'),
+          'http://192.168.12.60:5000/detaille/${widget.menuId}'),
     );
 
     if (response.statusCode == 200) {

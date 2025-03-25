@@ -236,7 +236,7 @@ class _AjouterimageState extends State<Ajouterimage> {
   }
 
   Future<http.Response> uploadFileToServer(File file) async {
-    final uri = Uri.parse('https://node-js-flutter-1.onrender.com/add/api');
+    final uri = Uri.parse('http://192.168.12.60:5000/add/api');
     final request = http.MultipartRequest('POST', uri);
     request.files.add(await http.MultipartFile.fromPath('file', file.path));
     final streamedResponse = await request.send();
@@ -244,7 +244,7 @@ class _AjouterimageState extends State<Ajouterimage> {
   }
 
   Future<bool> sendDataToNode(String imageUrl) async {
-    final uri = Uri.parse('https://node-js-flutter.onrender.com/add/endpoint');
+    final uri = Uri.parse('http://192.168.12.60:5000/add/endpoint');
     List<String> ingredientsList =
         ingredientsController.text.split(',').map((e) => e.trim()).toList();
     final Map<String, dynamic> data = {

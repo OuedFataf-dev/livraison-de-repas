@@ -309,7 +309,7 @@ class _PickerFileFromFirebaseState extends State<PickerFileFromFirebase> {
   }
 
   Future<http.Response> uploadFileToServer(File file) async {
-    final uri = Uri.parse('https://node-js-flutter-1.onrender.com/api/upload');
+    final uri = Uri.parse('http://192.168.12.60:5000/api/upload');
     final request = http.MultipartRequest('POST', uri);
 
     try {
@@ -324,7 +324,7 @@ class _PickerFileFromFirebaseState extends State<PickerFileFromFirebase> {
   }
 
   Future<bool> sendDataToNode(String imageUrl) async {
-    final uri = Uri.parse('https://node-js-flutter.onrender.com/api/endpoint');
+    final uri = Uri.parse('http://192.168.12.60:5000/api/endpoint');
 
     final Map<String, dynamic> data = {
       "imageUrl": imageUrl,
